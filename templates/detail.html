@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--Open Graph Meta Tags -->
+    <meta property="og:title" content="Personal Dictionary" />
+    <meta property="og:description" content="Greatest personal collection of words" />
+    <meta property="og:image" content="{{url_for('static', filename='banner.png')}}" />
+    <!-- Icons -->
+    <link rel="shortcut icon" href="{{url_for('static', filename='wp_favicon.ico')}}" type="image/x-icon" />
+    <link rel="icon" href="{{url_for('static', filename='wp_favicon.ico')}}" type="image/x-icon" />
+    <title>Dictionary | Home</title>
+    <!-- Bootstrap CSS And JS-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+        crossorigin="anonymous"></script>
+
+    <!-- AJAX -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <link href="{{url_for('static',filename='style.css')}}" rel="stylesheet"/>
+    <script>
+        let word = "{{word}}";
+        function go_home() {
+            window.location.href = '/';
+        };
+
+        function save_word(){
+            let defs = {{definitions | tojson}};
+            for (let i=0;i<defs.length;i++){
+                let def = defs[i];
+                let category = def.fl;
+                let shortdef = def.shortdef[0];
+                let date = def.date;
+                defs[i]={
+                    category: category,
+                    shortdef: shortdef,
+                    date: date,
+                }
+            }
+            let data = {
+                word_give: word,
+                definitions_give: defs,
+            };
+            $.ajax({
+                type: 'POST',
+                url: '/api/save_word',
+                data: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                success: function(response){
+                    if (response.status === 'success'){
+                        alert(response.msg);
+                        window.location.href=`/detail/${word}?status_give=saved`;
+                    } else {
+                        alert('Something went wrong ...');
+                    };
+                }
+            });
+        }
+
+        function del_word(){
+            $.ajax({
+                type: 'POST',
+                url: '/api/del_word',
+                data: {
+                    word_give: word,
+                },
+                success: function(response){
+                    if (response.status === 'success'){
+                        alert(response.msg);
+                        window.location.href=`/detail/${word}?status_give=new`;
+                    } else {
+                        alert('Something went wrong')
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="banner" onclick="go_home()"></div>
+
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end">
+                <div>
+                    <h1 id="word" style="display: inline;">{{word}}</h1>
+                </div>
+            </div>
+            <hr />
+            <div id="definition">
+                {%for definition in definitions%}
+                    {%set category = definition.fl%}
+                    {%set shortdef = definition.shortdef[0]%}
+                    {%set date = definition.date%}
+                    <div style="padding: 10px;">
+                        <i>{{category}}</i><br />
+                        {{shortdef}}<br />
+                        <span class="example">
+                            {{date}}
+                        </span>
+                    </div>
+                {%endfor%}
+            </div>
+
+            <hr />
+            {%if status == 'new'%}
+                <button onclick="save_word()" id="btn_save" class="btn btn-my-outline btn-lg">SAVE</button>
+            {%else%}
+                <button onclick="del_word()" id="btn_delete" class="btn btn-my btn-lg">DELETE</button>
+            {%endif%}
+        </div>
+
+    </div>
+    <footer class="py-3 my-4">
+        <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+            <li class="nav-item"><a href="/" class="nav-link px-2 text-muted">Home</a></li>
+        </ul>
+        <p class="text-center text-muted">© 2022 DARAH 'M Rands, Student</p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <title>Dictionary</title>
+    <script>
+        $(document).ready(function(){
+            begin_query();
+        })
+        function begin_query(){
+            let api_key = '0e5228e3-40df-4dce-92e0-36748eb1c24c';
+            word = 'computer';
+            final_url = `https://www.dictionaryapi.com/api/v3/references/collegiate/json/${word}?key=${api_key}`;
+            $.ajax({
+                type: 'GET',
+                url: final_url,
+                data: {},
+                success: function(response){
+                    console.log(response)
+                }
+
+            })
+        }
+    </script>
+</head>
+<body>
+    <h1>This is dictionary</h1>
+</body>
+</html>
