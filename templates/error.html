@@ -36,13 +36,13 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-end">
                 <div>
-                    <h1 id="word" style="display: inline;">Sorry, the word <strong>{{word}}</strong> nowhere to be found</h1>
+                    <h1 id="word" style="display: inline;">maaf bang, kata yang kau cari <strong style="color: rgb(48, 100, 255);">{{word}}</strong> ga  da disini </h1>
                 </div>
             </div>
             {%if suggests%}
             <hr />
             <div id="suggestions">
-                    <h2>Here are some suggestions.</h2>
+                <h2>lainnya mungkin dari <a style="color: rgb(48, 100, 255);">{{word}}</a>.</h2>
                     {%for suggest in suggests%}
                         <button type="button" class="btn btn-secondary mr-2 mb-2" onclick="window.location.href='/detail/{{suggest}}?status_give=new'">{{suggest}}</button>
                     {%endfor%}

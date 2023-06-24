@@ -54,13 +54,13 @@ def save_word():
     }
     db.words.insert_one(doc)
 
-    return jsonify({'msg':f'the word, {word}, was saved','status':'success'})
+    return jsonify({'msg':f'kata yang kamu cari  {word}, berhasil tersimpan!','status':'success'})
 
 @app.route('/api/del_word',methods=['POST'])
 def del_word():
     word = request.form.get('word_give')
     db.words.delete_one({'word':word})
-    return jsonify({'msg':f'the word, {word}, was deleted successfully','status':'success'})
+    return jsonify({'msg':f'kata yang kamu cari  {word}, berhasil terhapus!','status':'success'})
 
 @app.route('/error')
 def erno():

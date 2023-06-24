@@ -85,7 +85,7 @@ thead:last-child tr:last-child th:first-child{
 }
 
 tr.highlight > td{
-    background-color: orange;
+    background-color: #0080ff;
     color: white;
 }
 
