@@ -22,66 +22,136 @@
 
     <!-- AJAX -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <link href="{{url_for('static',filename='style.css')}}" rel="stylesheet"/>
+    <link href="{{url_for('static',filename='style.css')}}" rel="stylesheet" />
     <script>
         let word = "{{word}}";
+
+        $(window).ready(function () {
+            get_ex();
+        })
+
         function go_home() {
             window.location.href = '/';
         };
 
-        function save_word(){
-            let defs = {{definitions | tojson}};
-            for (let i=0;i<defs.length;i++){
-                let def = defs[i];
-                let category = def.fl;
-                let shortdef = def.shortdef[0];
-                let date = def.date;
-                defs[i]={
-                    category: category,
-                    shortdef: shortdef,
-                    date: date,
+        function save_word() {
+            let defs = {{ definitions | tojson
+        }};
+        for (let i = 0; i < defs.length; i++) {
+            let def = defs[i];
+            let category = def.fl;
+            let shortdef = def.shortdef[0];
+            let date = def.date;
+            defs[i] = {
+                category: category,
+                shortdef: shortdef,
+                date: date,
+            }
+        }
+        let data = {
+            word_give: word,
+            definitions_give: defs,
+        };
+        $.ajax({
+            type: 'POST',
+            url: '/api/save_word',
+            data: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    alert(response.msg);
+                    window.location.href = `/detail/${word}?status_give=saved`;
+                } else {
+                    alert('Something went wrong ...');
                 }
             }
-            let data = {
-                word_give: word,
-                definitions_give: defs,
-            };
-            $.ajax({
-                type: 'POST',
-                url: '/api/save_word',
-                data: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                success: function(response){
-                    if (response.status === 'success'){
-                        alert(response.msg);
-                        window.location.href=`/detail/${word}?status_give=saved`;
-                    } else {
-                        alert('Something went wrong ...');
-                    };
-                }
-            });
-        }
+        })
+}
 
-        function del_word(){
+        function del_word() {
             $.ajax({
                 type: 'POST',
                 url: '/api/del_word',
                 data: {
                     word_give: word,
                 },
-                success: function(response){
-                    if (response.status === 'success'){
+                success: function (response) {
+                    if (response.status === 'success') {
                         alert(response.msg);
-                        window.location.href=`/detail/${word}?status_give=new`;
+                        window.location.href = `/detail/${word}?status_give=new`;
                     } else {
                         alert('Something went wrong')
                     }
                 }
             })
         }
+
+        function get_ex() {
+            $('#example-list').empty();
+            $.ajax({
+                type: 'GET',
+                url: `/api/get_ex?word=${word}`,
+                data: {},
+                success: function (response) {
+                    if (response.status === 'success') {
+                        let examples = response.examples
+                        let temp_html = ``;
+                        for (let i = 0; i < examples.length; i++) {
+                            let example = examples[i]['example'];
+                            let idx = examples[i]['id'];
+                            temp_html += `
+                    <li>${example}  <a href="#example-list" onclick="del_ex('${idx}')">delete</a></li>
+                    `;
+                        };
+                        $('#example-list').append(temp_html);
+                    } else {
+                        alert('Something went wrong')
+                    }
+                }
+            })
+        }
+
+        function save_ex() {
+            let url = '/api/save_ex';
+            let example = $('#example_box').val();
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { 'example': example, 'word': word },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        alert(response.msg);
+                        window.location.reload();
+                    } else {
+                        alert('Something went wrong');
+                    };
+
+                }
+            });
+        };
+
+        function del_ex(idy) {
+            // alert(idy);
+            let url = '/api/del_ex';
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: { 'id': idy, 'word': word },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        alert(response.msg);
+                        window.location.reload();
+                    } else {
+                        alert('Something went wrong');
+                    };
+
+                }
+            });
+        };
     </script>
+    <script src="{{url_for('static',filename='ScrollToTop.js')}}"></script>
 </head>
 
 <body>
@@ -91,40 +161,66 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-end">
                 <div>
-                    <h1 id="word" style="display: inline;">{{word}}</h1>
+                    <h1 id="word" style="display: inline;">{{word}} <i>/ <a href='#example-list'
+                                style="font-size:25px;">example</a></i></h1>
                 </div>
             </div>
             <hr />
             <div id="definition">
                 {%for definition in definitions%}
-                    {%set category = definition.fl%}
-                    {%set shortdef = definition.shortdef[0]%}
-                    {%set date = definition.date%}
-                    <div style="padding: 10px;">
-                        <i>{{category}}</i><br />
-                        {{shortdef}}<br />
-                        <span class="example">
-                            {{date}}
-                        </span>
-                    </div>
+                {%set category = definition.fl%}
+                {%set shortdef = definition.shortdef[0]%}
+                {%set date = definition.date%}
+                <div style="padding: 10px;">
+                    <i>{{category}}</i><br />
+                    {{shortdef}}<br />
+                    <span class="example">
+                        {{date}}
+                    </span>
+                </div>
                 {%endfor%}
             </div>
 
             <hr />
             {%if status == 'new'%}
-                <button onclick="save_word()" id="btn_save" class="btn btn-my-outline btn-lg">SAVE</button>
+            <button onclick="save_word()" id="btn_save" class="btn btn-my-outline btn-lg">SAVE</button>
             {%else%}
-                <button onclick="del_word()" id="btn_delete" class="btn btn-my btn-lg">DELETE</button>
+            <button onclick="del_word()" id="btn_delete" class="btn btn-my btn-lg">DELETE</button>
             {%endif%}
         </div>
 
+        <div class="container" id="examples">
+            <h3 style="text-align: center;margin-bottom:1rem">Have an examples? write it below</h3>
+            <ul id="example-list">
+                <!-- Not working in firefox -->
+                <!-- <li>My mother was very angry at me. <a href="javascript:del_ex(del_0)">delete</a></li> -->
+
+                <li>My mother was very angry at me. <a href="#example-list"
+                        onclick="alert('Cannot access internet')">delete</a></li>
+            </ul>
+            <div class="d-flex justify-content-between" style="margin-left:20px;">
+                <input id="example_box" class="form-control form-control-sm" style="margin-right: 0.5rem">
+                <button class="btn btn-outline-secondary btn-sm" onclick="save_ex()">add</button>
+            </div>
+        </div>
+
     </div>
-    <footer class="py-3 my-4">
+
+    <footer class="my-3">
         <ul class="nav justify-content-center border-bottom pb-3 mb-3">
             <li class="nav-item"><a href="/" class="nav-link px-2 text-muted">Home</a></li>
         </ul>
         <p class="text-center text-muted">© 2022 DARAH 'M Rands, Student</p>
     </footer>
+
+    <button type="button" class="btn btn-danger btn-floating btn-lg" onclick="backToTop()" id="btn-back-to-top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16">
+            <path
+                d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z" />
+        </svg>
+    </button>
+
 </body>
 
 </html>

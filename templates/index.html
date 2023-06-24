@@ -22,7 +22,7 @@
 
     <!-- AJAX -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-    <link href="{{url_for('static',filename='style.css')}}" rel="stylesheet"/>
+    <link href="{{url_for('static',filename='mystyle.css')}}" rel="stylesheet"/>
     <script>
         {%if msg%}
             alert("{{msg}}");
@@ -39,8 +39,8 @@
 
         function search_word(){
             let word = $('#input_word').val().toLowerCase().trim();
-            if (!word){
-                alert('isi dulu woi');
+            if (word == ''){
+                alert('no search query');
                 return;
             }
             if (word_list.includes(word)){
@@ -54,6 +54,7 @@
         }
 
     </script>
+    <script src="{{url_for('static',filename='ScrollToTop.js')}}"></script>
 </head>
 
 <body>
@@ -63,7 +64,10 @@
         <div class="search-box d-flex justify-content-center">
             <input type="text" id="input_word" class="form-control" style="margin-right: 0.5rem;">
             <button class="btn btn-light" onclick="search_word()">
-                SEARCH
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+                <!-- Search -->
                 <!-- <i class="fa fa-search"></i> -->
             </button>
         </div>
@@ -78,9 +82,9 @@
             <tbody id="tbody_box">
                 {%for word in saved%}
                     {%set definition=word.definition%}
-                    {%set word=word.word%}
-                    <tr id="the-{{word}}">
-                        <td><a href="/detail/{{word}}?status_give=saved">{{word}}</a></td>
+                    {%set word_target=word.word%}
+                    <tr id="the-{{word_target}}">
+                        <td><a href="/detail/{{word_target}}?status_give=saved">{{word_target}}</a></td>
                         <td>{{definition}}</td>
                     </tr>
                 {%endfor%}
@@ -88,13 +92,18 @@
         </table>
     </div>
 
-    <footer class="py-3 my-4">
+    <footer class="my-3">
         <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-            <li class="nav-item"><a href="/detail/example" class="nav-link px-2 text-muted">Detail</a></li>
+            <li class="nav-item"><a href="/detail/detail?status_give={{detail}}" class="nav-link px-2 text-muted">Detail</a></li>
         </ul>
         <p class="text-center text-muted">© 2022 DARAH 'M Rands, Student</p>
     </footer>
 
+    <button type="button" class="btn btn-danger btn-floating btn-lg" onclick="backToTop()" id="btn-back-to-top">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle-fill" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 0 0 8a8 8 0 0 0 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+        </svg>
+    </button>
 
 </body>
 
